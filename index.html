@@ -424,7 +424,8 @@
 
         <div class="main-content">
             <div class="security-notice">
-                🔒 This system is secured with advanced anti-tampering protection
+                🔒 This system is secured with advanced anti-tampering protection<br>
+                <small style="color: #666; font-weight: normal;">Use "Clear Current Number" to remove displayed result or "Wall Delete" for complete reset</small>
             </div>
 
             <!-- Statistics -->
@@ -449,7 +450,7 @@
                 <div class="lottery-display">
                     <div class="winning-number" id="winningNumber">Ready to Draw!</div>
                     <button onclick="secureDrawNumber()" class="lottery-btn" id="drawBtn">Draw Number</button>
-                    <button onclick="confirmReset()" class="lottery-btn btn-danger">Reset Draw</button>
+                    <button onclick="clearCurrentDraw()" class="lottery-btn btn-danger">Clear Current Number</button>
                     <button onclick="confirmWallDelete()" class="lottery-btn btn-danger" style="background: linear-gradient(135deg, #e74c3c, #c0392b); margin-top: 10px;">Wall Delete</button>
                 </div>
             </div>
@@ -590,48 +591,27 @@
             }, 1000);
         }
 
-        function confirmReset() {
+        function clearCurrentDraw() {
             if (!validateIntegrity()) return;
             
-            if (confirm('Are you sure you want to reset only the current draw? This will clear the current winning number.')) {
-                encryptedData = {
-                    drawn: [],
-                    history: [],
-                    timestamp: Date.now()
-                };
+            const currentNumber = document.getElementById('winningNumber').textContent;
+            if (currentNumber === 'Ready to Draw!' || !currentNumber || isNaN(currentNumber)) {
+                alert('No number is currently drawn to clear!');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to clear the currently displayed number: ${currentNumber}?`)) {
                 document.getElementById('winningNumber').textContent = 'Ready to Draw!';
-                updateSecureDisplay();
-                updateHistory();
+                alert('Current displayed number cleared successfully!');
             }
         }
 
         function confirmWallDelete() {
             if (!validateIntegrity()) return;
             
-            // First confirmation
-            if (!confirm('⚠️ WARNING: Wall Delete will completely reset the entire lottery system!')) {
-                return;
+            if (confirm('আপনি কি পুনরায় পুরাতন সবকিছু ডিলিট করে দিতে চান?\n\nএই পর্যন্ত যত কাজ করেছেন ক্লিক করলে সবকিছু ডিলিট হয়ে যাবে।\nনতুন ওয়েবসাইটের মত হয়ে যাবে।\n\nContinue?')) {
+                performWallDelete();
             }
-            
-            // Second confirmation with typing requirement
-            const confirmText = prompt('Type "DELETE EVERYTHING" to confirm complete system reset:');
-            if (confirmText !== "DELETE EVERYTHING") {
-                alert('Reset cancelled. Text did not match.');
-                return;
-            }
-            
-            // Third confirmation
-            if (!confirm('This is your FINAL WARNING!\n\nWall Delete will:\n• Clear all drawn numbers\n• Clear all history\n• Reset everything to fresh state\n\nThis action CANNOT be undone!\n\nProceed?')) {
-                return;
-            }
-            
-            // Fourth confirmation for absolute safety
-            if (!confirm('Are you 100% certain you want to perform Wall Delete?\n\nClick OK only if you want to start completely fresh.')) {
-                return;
-            }
-            
-            // Perform wall delete with animation
-            performWallDelete();
         }
 
         function performWallDelete() {
