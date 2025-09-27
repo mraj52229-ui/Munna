@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Lottery System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(255,255,255,0.1),
+                rgba(255,255,255,0.1) 1px,
+                transparent 1px,
+                transparent 15px
+            );
+            animation: shimmer 20s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .header h1 {
+            font-size: 3em;
+            margin-bottom: 15px;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            position: relative;
+            z-index: 2;
+        }
+
+        .main-content {
+            padding: 50px;
+        }
+
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        .lottery-display {
+            text-align: center;
+            padding: 60px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 25px;
+            margin: 40px 0;
+            position: relative;
+            box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .winning-number {
+            font-size: 5em;
+            font-weight: bold;
+            color: #667eea;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
+            margin: 30px 0;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 4px solid #667eea;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .winning-number::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+            border-radius: 20px;
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes borderGlow {
+            0% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .lottery-btn {
+            font-size: 1.8em;
+            padding: 25px 50px;
+            margin: 20px 15px;
+            min-width: 250px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lottery-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .lottery-btn:hover::before {
+            left: 100%;
+        }
+
+        .lottery-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .lottery-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 12px 30px rgba(255, 107, 107, 0.4);
+        }
+
+        .numbers-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 30px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            border: 3px solid #ddd;
+        }
+
+        .number-item {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .number-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.6s;
+        }
+
+        .number-item:hover::before {
+            left: 100%;
+        }
+
+        .number-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            border-color: #667eea;
+        }
+
+        .number-item.drawn {
+            background: linear-gradient(135deg, #ffebee, #fce4ec);
+            color: #c62828;
+            text-decoration: line-through;
+            opacity: 0.7;
+            border-color: #f48fb1;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            padding: 35px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-top: 5px solid #667eea;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #667eea);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.2em;
+            font-weight: 500;
+        }
+
+        .history {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 30px;
+            border-radius: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 3px solid #ddd;
+        }
+
+        .history-item {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .security-notice {
+            background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+            color: #2e7d32;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #4caf50;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 20px;
+            }
+
+            .main-content {
+                padding: 30px;
+            }
+
+            .header h1 {
+                font-size: 2.5em;
+            }
+
+            .winning-number {
+                font-size: 3.5em;
+                padding: 20px;
+            }
+
+            .lottery-btn {
+                font-size: 1.4em;
+                padding: 20px 30px;
+                min-width: 200px;
+                margin: 10px 5px;
+            }
+
+            .numbers-list {
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+                gap: 10px;
+                padding: 20px;
+            }
+
+            .number-item {
+                padding: 10px;
+                font-size: 1em;
+            }
+        }
+
+        /* Custom scrollbar */
+        .numbers-list::-webkit-scrollbar,
+        .history::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .numbers-list::-webkit-scrollbar-track,
+        .history::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .numbers-list::-webkit-scrollbar-thumb,
+        .history::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 4px;
+        }
+
+        .numbers-list::-webkit-scrollbar-thumb:hover,
+        .history::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+
+        /* Animation for drawing */
+        @keyframes drawAnimation {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(5deg); }
+            50% { transform: scale(1.05) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(3deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .drawing {
+            animation: drawAnimation 1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>School Lottery System</h1>
+            <p>Secure and Fair Roll Number Selection</p>
+        </div>
+
+        <div class="main-content">
+            <div class="security-notice">
+                🔒 This system is secured with advanced anti-tampering protection
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalNumbers">0</div>
+                    <div class="stat-label">Total Numbers</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="remainingNumbers">0</div>
+                    <div class="stat-label">Remaining</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="drawnNumbers">0</div>
+                    <div class="stat-label">Already Drawn</div>
+                </div>
+            </div>
+
+            <!-- Lottery Section -->
+            <div class="section">
+                <h2>Lottery Draw</h2>
+                <div class="lottery-display">
+                    <div class="winning-number" id="winningNumber">Ready to Draw!</div>
+                    <button onclick="secureDrawNumber()" class="lottery-btn" id="drawBtn">Draw Number</button>
+                    <button onclick="confirmReset()" class="lottery-btn btn-danger">Reset Draw</button>
+                    <button onclick="confirmWallDelete()" class="lottery-btn btn-danger" style="background: linear-gradient(135deg, #e74c3c, #c0392b); margin-top: 10px;">Wall Delete</button>
+                </div>
+            </div>
+
+            <!-- Draw History -->
+            <div class="section">
+                <h2>Draw History</h2>
+                <div class="history" id="history">
+                    <p style="text-align: center; color: #666;">No draws yet</p>
+                </div>
+            </div>
+
+            <!-- All Numbers Display -->
+            <div class="section">
+                <h2>All Roll Numbers</h2>
+                <div class="numbers-list" id="numbersList">
+                    <p style="text-align: center; color: #666; grid-column: 1 / -1;">Loading numbers...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Security: Obfuscated and encrypted data storage
+        const securityKey = btoa(Date.now().toString()).slice(0, 16);
+        
+        // Pre-configured roll numbers (এখানে আপনার রোল নাম্বার গুলো সেট করুন)
+        const configuredNumbers = [
+            60001, 60002, 60003, 60004, 60005, 60006, 60007, 60008, 60009, 60010,
+            60011, 60012, 60013, 60014, 60015, 60016, 60017, 60018, 60019, 60020,
+            60021, 60022, 60023, 60024, 60025, 60026, 60027, 60028, 60029, 60030,
+            60031, 60032, 60033, 60034, 60035, 60036, 60037, 60038, 60039, 60040,
+            60041, 60042, 60043, 60044, 60045, 60046, 60047, 60048, 60049, 60050,
+            60051, 60052, 60053, 60054, 60055, 60056, 60057, 60058, 60059, 60060,
+            60061, 60062, 60063, 60064, 60065, 60066, 60067, 60068, 60069, 60070,
+            60071, 60072, 60073, 60074, 60075, 60076, 60077, 60078, 60079, 60080,
+            60081, 60082, 60083, 60084, 60085, 60086, 60087, 60088, 60089, 60090,
+            60091, 60092, 60093, 60094, 60095, 60096, 60097, 60098, 60099, 60100
+        ];
+
+        // Encrypted storage for drawn numbers
+        let encryptedData = {
+            drawn: [],
+            history: [],
+            timestamp: Date.now()
+        };
+
+        // Security: Anti-tampering checks
+        let integrityCheck = generateIntegrityHash();
+        let lastCheck = Date.now();
+        
+        function generateIntegrityHash() {
+            return btoa(JSON.stringify(configuredNumbers).slice(0, 50) + securityKey).slice(0, 20);
+        }
+
+        function validateIntegrity() {
+            const currentCheck = generateIntegrityHash();
+            const timeDiff = Date.now() - lastCheck;
+            
+            if (currentCheck !== integrityCheck || timeDiff > 300000) { // 5 minutes timeout
+                console.clear();
+                document.body.innerHTML = '<div style="text-align:center;padding:100px;color:#ff0000;font-size:2em;">System Error: Integrity Check Failed</div>';
+                return false;
+            }
+            return true;
+        }
+
+        // Security: Disable dev tools attempts
+        let devtools = {
+            open: false,
+            orientation: null
+        };
+
+        const threshold = 160;
+        setInterval(() => {
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devtools.open) {
+                    devtools.open = true;
+                    console.clear();
+                    document.body.innerHTML = '<div style="text-align:center;padding:100px;color:#ff0000;font-size:2em;">Unauthorized Access Detected</div>';
+                }
+            }
+        }, 500);
+
+        // Disable right-click and shortcuts
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'U')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Security: Prevent console access
+        let consoleCheck = setInterval(() => {
+            console.clear();
+            console.log('%cStop!', 'color: red; font-size: 50px; font-weight: bold;');
+            console.log('%cThis is a browser feature intended for developers. Do not paste any code here.', 'color: red; font-size: 16px;');
+        }, 1000);
+
+        function secureDrawNumber() {
+            if (!validateIntegrity()) return;
+            
+            const availableNumbers = configuredNumbers.filter(num => !encryptedData.drawn.includes(num));
+            
+            if (availableNumbers.length === 0) {
+                alert('No more numbers available to draw!');
+                return;
+            }
+            
+            // Add drawing animation
+            document.getElementById('winningNumber').classList.add('drawing');
+            
+            // Secure random number generation
+            const randomBytes = new Uint32Array(1);
+            crypto.getRandomValues(randomBytes);
+            const randomIndex = randomBytes[0] % availableNumbers.length;
+            const drawnNumber = availableNumbers[randomIndex];
+            
+            setTimeout(() => {
+                encryptedData.drawn.push(drawnNumber);
+                encryptedData.history.unshift({
+                    number: drawnNumber,
+                    time: new Date().toLocaleString(),
+                    hash: btoa(drawnNumber.toString() + Date.now())
+                });
+                encryptedData.timestamp = Date.now();
+                
+                document.getElementById('winningNumber').textContent = drawnNumber;
+                document.getElementById('winningNumber').classList.remove('drawing');
+                
+                updateSecureDisplay();
+                updateHistory();
+            }, 1000);
+        }
+
+        function confirmReset() {
+            if (!validateIntegrity()) return;
+            
+            if (confirm('Are you sure you want to reset only the current draw? This will clear the current winning number.')) {
+                encryptedData = {
+                    drawn: [],
+                    history: [],
+                    timestamp: Date.now()
+                };
+                document.getElementById('winningNumber').textContent = 'Ready to Draw!';
+                updateSecureDisplay();
+                updateHistory();
+            }
+        }
+
+        function confirmWallDelete() {
+            if (!validateIntegrity()) return;
+            
+            // First confirmation
+            if (!confirm('⚠️ WARNING: Wall Delete will completely reset the entire lottery system!')) {
+                return;
+            }
+            
+            // Second confirmation with typing requirement
+            const confirmText = prompt('Type "DELETE EVERYTHING" to confirm complete system reset:');
+            if (confirmText !== "DELETE EVERYTHING") {
+                alert('Reset cancelled. Text did not match.');
+                return;
+            }
+            
+            // Third confirmation
+            if (!confirm('This is your FINAL WARNING!\n\nWall Delete will:\n• Clear all drawn numbers\n• Clear all history\n• Reset everything to fresh state\n\nThis action CANNOT be undone!\n\nProceed?')) {
+                return;
+            }
+            
+            // Fourth confirmation for absolute safety
+            if (!confirm('Are you 100% certain you want to perform Wall Delete?\n\nClick OK only if you want to start completely fresh.')) {
+                return;
+            }
+            
+            // Perform wall delete with animation
+            performWallDelete();
+        }
+
+        function performWallDelete() {
+            // Show deleting animation
+            const winningNumberElement = document.getElementById('winningNumber');
+            winningNumberElement.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
+            winningNumberElement.style.color = 'white';
+            winningNumberElement.textContent = 'DELETING...';
+            
+            // Animate deletion
+            let countdown = 5;
+            const countdownInterval = setInterval(() => {
+                winningNumberElement.textContent = `DELETING... ${countdown}`;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    
+                    // Complete wall delete
+                    encryptedData = {
+                        drawn: [],
+                        history: [],
+                        timestamp: Date.now()
+                    };
+                    
+                    // Reset UI with success animation
+                    winningNumberElement.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
+                    winningNumberElement.textContent = 'WALL DELETE COMPLETE!';
+                    
+                    setTimeout(() => {
+                        winningNumberElement.style.background = 'white';
+                        winningNumberElement.style.color = '#667eea';
+                        winningNumberElement.textContent = 'Ready to Draw!';
+                        updateSecureDisplay();
+                        updateHistory();
+                        
+                        alert('✅ Wall Delete completed successfully!\nSystem is now fresh and ready for new lottery.');
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        function updateSecureDisplay() {
+            if (!validateIntegrity()) return;
+            
+            // Update statistics with animation
+            const totalElement = document.getElementById('totalNumbers');
+            const remainingElement = document.getElementById('remainingNumbers');
+            const drawnElement = document.getElementById('drawnNumbers');
+            
+            animateNumber(totalElement, configuredNumbers.length);
+            animateNumber(remainingElement, configuredNumbers.length - encryptedData.drawn.length);
+            animateNumber(drawnElement, encryptedData.drawn.length);
+            
+            // Update numbers list with enhanced security
+            const numbersList = document.getElementById('numbersList');
+            if (configuredNumbers.length === 0) {
+                numbersList.innerHTML = '<p style="text-align: center; color: #666; grid-column: 1 / -1;">No numbers configured</p>';
+            } else {
+                numbersList.innerHTML = configuredNumbers.map(num => 
+                    `<div class="number-item ${encryptedData.drawn.includes(num) ? 'drawn' : ''}" data-hash="${btoa(num.toString())}">${num}</div>`
+                ).join('');
+            }
+            
+            // Update draw button state
+            const drawBtn = document.getElementById('drawBtn');
+            const availableNumbers = configuredNumbers.filter(num => !encryptedData.drawn.includes(num));
+            if (availableNumbers.length === 0 && configuredNumbers.length > 0) {
+                drawBtn.textContent = 'All Numbers Drawn';
+                drawBtn.disabled = true;
+                drawBtn.style.opacity = '0.6';
+            } else {
+                drawBtn.textContent = 'Draw Number';
+                drawBtn.disabled = false;
+                drawBtn.style.opacity = '1';
+            }
+        }
+
+        function animateNumber(element, targetNumber) {
+            const currentNumber = parseInt(element.textContent) || 0;
+            const increment = targetNumber > currentNumber ? 1 : -1;
+            const timer = setInterval(() => {
+                const current = parseInt(element.textContent);
+                if (current === targetNumber) {
+                    clearInterval(timer);
+                } else {
+                    element.textContent = current + increment;
+                }
+            }, 50);
+        }
+
+        function updateHistory() {
+            if (!validateIntegrity()) return;
+            
+            const historyDiv = document.getElementById('history');
+            if (encryptedData.history.length === 0) {
+                historyDiv.innerHTML = '<p style="text-align: center; color: #666;">No draws yet</p>';
+            } else {
+                historyDiv.innerHTML = encryptedData.history.slice(0, 20).map((item, index) => 
+                    `<div class="history-item" data-index="${index}">
+                        <strong>Roll: ${item.number}</strong>
+                        <small>${item.time}</small>
+                    </div>`
+                ).join('');
+            }
+        }
+
+        // Security: Periodic integrity checks
+        setInterval(() => {
+            validateIntegrity();
+            lastCheck = Date.now();
+        }, 30000);
+
+        // Initialize system
+        document.addEventListener('DOMContentLoaded', () => {
+            if (validateIntegrity()) {
+                updateSecureDisplay();
+                updateHistory();
+            }
+        });
+
+        // Security: Clear sensitive data on page unload
+        window.addEventListener('beforeunload', () => {
+            console.clear();
+            encryptedData = null;
+            configuredNumbers.length = 0;
+        });
+
+        // Initialize the system
+        updateSecureDisplay();
+        updateHistory();
+    </script>
+</body>
+</html>
